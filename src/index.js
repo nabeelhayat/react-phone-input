@@ -16,6 +16,7 @@ class PhoneInput extends React.Component {
       PropTypes.number
     ]),
     value: PropTypes.string,
+    primaryColor: PropTypes.string,
 
     onlyCountries: PropTypes.arrayOf(PropTypes.string),
     preferredCountries: PropTypes.arrayOf(PropTypes.string),
@@ -99,12 +100,15 @@ class PhoneInput extends React.Component {
       PropTypes.func,
     ]),
     defaultErrorMessage: PropTypes.string,
+
     specialLabel: PropTypes.string,
+    disableSpecialLabelFocused: PropTypes.bool,
   }
 
   static defaultProps = {
     country: '',
     value: '',
+    primaryColor: '#1976d2',
 
     onlyCountries: [],
     preferredCountries: [],
@@ -214,6 +218,8 @@ class PhoneInput extends React.Component {
     );
 
     const highlightCountryIndex = onlyCountries.findIndex(o => o == countryGuess);
+
+    document.documentElement.style.setProperty('--primary-color', props.primaryColor);
 
     this.state = {
       showDropdown: props.showDropdown,
@@ -645,6 +651,11 @@ class PhoneInput extends React.Component {
 
     this.setState({ placeholder: '' });
 
+    if (this.specialLabelRef) {
+      const specialLabelDiv = this.specialLabelRef;
+      specialLabelDiv.classList.add('special-label-focused'); 
+    }
+
     this.props.onFocus && this.props.onFocus(e, this.getCountryData());
     this.props.jumpCursorToEnd && setTimeout(this.cursorToEnd, 0);
   }
@@ -652,6 +663,11 @@ class PhoneInput extends React.Component {
   handleInputBlur = (e) => {
     if (!e.target.value) this.setState({ placeholder: this.props.placeholder });
     this.props.onBlur && this.props.onBlur(e, this.getCountryData());
+
+    if (this.specialLabelRef) {
+      const specialLabelDiv = this.specialLabelRef;
+      specialLabelDiv.classList.remove('special-label-focused'); 
+    }
   }
 
   handleInputCopy = (e) => {
@@ -956,7 +972,7 @@ class PhoneInput extends React.Component {
         className={`${containerClasses} ${this.props.className}`}
         style={this.props.style || this.props.containerStyle}
         onKeyDown={this.handleKeydown}>
-        {specialLabel && <div className='special-label'>{specialLabel}</div>}
+        {specialLabel && <div className='special-label' ref={el => this.specialLabelRef = el}>{specialLabel}</div>}
         {errorMessage && <div className='invalid-number-message'>{errorMessage}</div>}
         <input
           className={inputClasses}
